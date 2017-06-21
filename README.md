@@ -7,6 +7,11 @@
 根据日期查询时间内的日志
 -----------------------------------
     使用ansbible获取远端服务器日志信息，通过web展示
+    
+    
+python db_create.py #执行sql 
+
+python run.py#运行服务
       
       
 
