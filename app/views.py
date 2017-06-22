@@ -5,6 +5,7 @@ from .models import ms_mi_log, total_log
 import time
 import os
 import re
+import sys
 
 @app.route('/')
 def index():
@@ -62,18 +63,19 @@ def api():
     return 'OK'
 
 
-def event_stream(logfile, filter=None):
-    logfile = os.path.join('/logs/'+logfile)
-    with open(logfile) as f:
-        for line in f.readlines():
-            if filter is not None:
-                re_filter=re.compile(r'(%s)'%filter,re.I)
-                if re.findall(re_filter,line):
-                    res=re.sub(re_filter,r'<font color="red">\1</font>',line)
-                    yield 'data: %s\n\n' % res.rstrip()
-            else:
-                yield 'data: %s\n\n' % line.rstrip()
-        time.sleep(1)
+def event_stream(logfile,filter=None):
+    logfile="/alidata/www/logs/%s" % logfile
+    command = '''ansible test -a "tail -n10 %s"''' % (logfile)
+    textlist = os.popen(command).readlines()
+    for line in textlist:
+        if filter is not None:
+            re_filter=re.compile(r'(%s)'%filter,re.I)
+            if re.findall(re_filter,line):
+                res=re.sub(re_filter,r'<font color="red">\1</font>',line)
+                yield 'data: %s\n\n' % res.rstrip()
+        else:
+            yield 'data: %s\n\n' % line.rstrip()
+
 
 
 @app.route('/stream/<logfile>')
