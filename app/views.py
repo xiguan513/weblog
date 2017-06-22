@@ -41,11 +41,13 @@ def outlog(First_time,Last_time):
     logfile="/alidata/www/logs/catalina-2017-06-22.log"
     first_time_list = First_time.split(' ')[0]
     common = """ansible test -m script -a "/home/song/tomcat_log_time.sh '{First}' '{Last}' {logfile}" """
-    #(status,output) = commands.getstatusoutput(common.format(First=First_time, Last=Last_time, logfile=logfile))
-    output=os.popen(common.format(First=First_time, Last=Last_time, logfile=logfile))
+    (status,output) = commands.getstatusoutput(common.format(First=First_time, Last=Last_time, logfile=logfile))
 
-    for line in output.readlines():
-        yield '%s\n\n' % line
+    if status==0:
+        for line in output.readlines():
+            yield '%s\n\n' % line
+    else:
+        yield "Get Log File Fail!"
 
 
 @app.route('/query')
