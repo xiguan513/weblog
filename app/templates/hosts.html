@@ -16,16 +16,16 @@
           <div class="col-md-2">
           </div>
           <div class="col-md-3">
-           输入主机IP
+           输入主机名
             <input type="text" class="form-control" id="ip" name="ip" placeholder="192.168.1.1">
           </div>
           <div class="form-group">
             开始日期
-            <input class="form_date form-control"  id="starttime" size="16" type="text" value="" name="date" placeholder="2015-09-12" >
+            <input class="form_date form-control" id="starttime" size="16" type="datetime-local" value="2017-01-01T00:00" name="First Time"/>
           </div>
           <div class="form-group">
             结束日期
-            <input class="form_date form-control" id="endtime" size="16" type="text" value="" name="date" placeholder="2015-09-12" >
+            <input class="form_date form-control" id="endtime" size="16" type="datetime-local" value="2017-01-01T00:00" name="Last Time"/>
           </div>
           <button type="submit" id="start" class="btn btn-default">查询</button>
             <button type="submit" id="clear" class="btn btn-default">清空</button>
@@ -40,43 +40,43 @@
         </div>
     </div>
     </div>
-    <div class="row">
-        <div class="col-md-1">
-        </div>
-        <div class="col-md-8">
-            <font size="2px">
-                {% for p in ms_mi_log_data %}
-                <p>ip:{{p.ip}} rc:{{p.rc}} uin:{{p.uin}} mbox:{{p.mbox}} des:{{p.des}}</p>
-                {% endfor %}
-            </font>
-        </div>
-    </div>
+{#    <div class="row">#}
+{#        <div class="col-md-1">#}
+{#        </div>#}
+{#        <div class="col-md-8">#}
+{#            <font size="2px">#}
+{#                {% for p in ms_mi_log_data %}#}
+{#                <p>ip:{{p.ip}} rc:{{p.rc}} uin:{{p.uin}} mbox:{{p.mbox}} des:{{p.des}}</p>#}
+{#                {% endfor %}#}
+{#            </font>#}
+{#        </div>#}
+{#    </div>#}
 </div>
 
-<script type="text/javascript">
-    $('.form_date').datetimepicker({
-        language:  'fr',
-        weekStart: 1,
-        todayBtn:  1,
-        autoclose: 1,
-        todayHighlight: 1,
-        startView: 2,
-        minView: 2,
-        forceParse: 0,
-        format: 'yyyy-mm-dd'
-    });
-
-</script>
+{#<script type="text/javascript">#}
+{#    $('.form_date').datetimepicker({#}
+{#        language:  'fr',#}
+{#        weekStart: 1,#}
+{#        todayBtn:  1,#}
+{#        autoclose: 1,#}
+{#        todayHighlight: 1,#}
+{#        startView: 2,#}
+{#        minView: 2,#}
+{#        forceParse: 0,#}
+{#        format: 'yyyy-mm-dd'#}
+{#    });#}
+{##}
+{#</script>#}
 
 <script>
 
             var t = false;
             function sse(ip,starttime,endtime) {
-
-                var source = new EventSource('/query/'+starttime+'/'+starttime);
+                var source = new EventSource('/query'+'?'+ip+'&'+'First+Time='+starttime+'&'+'Last+Time='+endtime);
 
                 // var out = document.getElementById('out');
                 source.onmessage = function(e) {
+                    alert("测试1111111111111111111111111111")
                     // XSS in chat is fun
                     if(t){
                         source.close();
@@ -84,8 +84,7 @@
                     };
                     // out.innerHTML =  e.data + '\\n' + out.innerHTML;
                     //$("#out").append(e.data+'</br>');
-                    document.getElementById('out').innerHTML+=e.data+'</br>'
-                    $('#out').scrollTop( $('#out')[0].scrollHeight );
+
 
                 };
             }
@@ -108,7 +107,7 @@
               ip=$("#ip").val();
               endtime=$("#endtime").val();
               t = false;
-              console.log(logfile);
+              //console.log(logfile);
               sse(ip,starttime,endtime);
             });
             $('#clean').click(function(){

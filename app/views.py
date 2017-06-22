@@ -6,6 +6,7 @@ import time
 import os
 import re
 import sys
+import commands
 
 @app.route('/')
 def index():
@@ -36,17 +37,35 @@ def main():
     return render_template("ms_mi.html", echarts_date=echarts_date, ms_data_str=ms_data_str, mi_data_str=mi_data_str)
 
 
+def outlog(First_time,Last_time):
+    logfile="/alidata/www/logs/catalina-2017-06-22.log"
+    first_time_list = First_time.split(' ')[0]
+    common = """ansible test -m script -a "/home/song/tomcat_log_time.sh '{First}' '{Last}' {logfile}" """
+    #(status,output) = commands.getstatusoutput(common.format(First=First_time, Last=Last_time, logfile=logfile))
+    output=os.popen(common.format(First=First_time, Last=Last_time, logfile=logfile))
+
+    for line in output.readlines():
+        yield '%s\n\n' % line
+
+
 @app.route('/query')
 def query():
-    query_date = request.form.get('date', '')
-    if query_date != '':
-        ms_mi_log_data = ms_mi_log.query.filter(ms_mi_log.date.like(query_date+'%')).order_by('ip').all()
-        # for s in ms_mi_log_data:
-        #     print s
-    else:
-        ms_mi_log_data = []
+    First_time = request.args.get("First Time").replace('T', ' ')
+    Last_time = request.args.get("Last Time").replace('T', ' ')
+    return Response(outlog(First_time, Last_time),
+                    mimetype="text/event-stream")
 
-    return render_template("hosts.html", ms_mi_log_data=ms_mi_log_data)
+    # query_date = request.form.get('date', '')
+    # if query_date != '':
+    #     ms_mi_log_data = ms_mi_log.query.filter(ms_mi_log.date.like(query_date+'%')).order_by('ip').all()
+    #     # for s in ms_mi_log_data:
+    #     #     print s
+    # else:
+    #     ms_mi_log_data = []
+    #
+    # return render_template("hosts.html", ms_mi_log_data=ms_mi_log_data)
+
+
 
 
 @app.route('/api', methods=['POST'])
@@ -83,3 +102,4 @@ def event_stream(logfile,filter=None):
 def stream(logfile, filter=None):
     return Response(event_stream(logfile, filter),
                     mimetype="text/event-stream")
+
