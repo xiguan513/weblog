@@ -14,7 +14,17 @@
                         <!--<div class="col-md-2"></div>-->
                         <div class="form-group">
                             <label class="sr-only" for="exampleInputEmail3">Email address</label>
-                            <input type="text" id="ip" class="form-control"  placeholder="主机名">
+                            <!--<input type="text" id="ip" class="form-control"  placeholder="主机名">-->
+                            <select type="text" id="ip" class="form-control"  placeholder="主机名">
+                            <option value='tomcat_core_ife'>tomcat_core_ife</option>
+                            <option value='tomcat_core_biz'>tomcat_core_biz</option>
+                            <option value='tomcat_loan_biz'>tomcat_loan_biz</option>
+                            <option value='tomcat_ofe_appl'>tomcat_ofe_appl</option>
+                            <option value='tomcat_appl_biz'>tomcat_appl_biz</option>
+                            <option value='tomcat_workflow_core'>tomcat_workflow_core</option>
+                            <option value='tomcat_message'>tomcat_message</option>
+                            <option value='tomcat_tasks'>tomcat_tasks</option>
+                            </select><br>
                         </div>
                         <div class="form-group">
                             <label class="sr-only" for="exampleInputPassword3">Password</label>
@@ -59,7 +69,7 @@
             
             var t = false;
             function sse(ip,logfile,filter,startmem,endmem) {
-
+                    alert(ip)
                     var source = new EventSource('/greplog/'+logfile+'/'+filter+'/'+startmem+'/'+endmem);
 
                 // var out = document.getElementById('out');
