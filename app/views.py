@@ -23,6 +23,10 @@ def weblog():
     return render_template("weblog.html")
 
 
+@app.route('/greplog')
+def greplog():
+    return render_template("greplog.html")
+
 @app.route('/index')
 def main():
     interval_date = datetime.datetime.now() - datetime.timedelta(days=7)
@@ -56,18 +60,6 @@ def query():
     Last_time = request.args.get("Last Time").replace('T', ' ')
     return Response(outlog(First_time, Last_time),
                     mimetype="text/event-stream")
-
-    # query_date = request.form.get('date', '')
-    # if query_date != '':
-    #     ms_mi_log_data = ms_mi_log.query.filter(ms_mi_log.date.like(query_date+'%')).order_by('ip').all()
-    #     # for s in ms_mi_log_data:
-    #     #     print s
-    # else:
-    #     ms_mi_log_data = []
-    #
-    # return render_template("hosts.html", ms_mi_log_data=ms_mi_log_data)
-
-
 
 
 @app.route('/api', methods=['POST'])
@@ -105,3 +97,24 @@ def stream(logfile, filter=None):
     return Response(event_stream(logfile, filter),
                     mimetype="text/event-stream")
 
+
+
+
+def event_keywords(logfile,filter):
+    logfile="/alidata/www/logs/%s" % logfile
+    command = '''ansible test -a "grep -n %s %s"''' % (filter,logfile)
+    textlist = os.popen(command).readlines()
+    for line in textlist:
+        if filter is not None:
+            re_filter=re.compile(r'(%s)'%filter,re.I)
+            if re.findall(re_filter,line):
+                res=re.sub(re_filter,r'<font color="red">\1</font>',line)
+                yield 'data: %s\n\n' % res.rstrip()
+        else:
+            yield 'data: %s\n\n' % "Query condition is empty. Please confirm"
+
+
+@app.route('/greplog/<logfile>/<filter>')
+def keywords(logfile, filter,):
+    return Response(event_keywords(logfile, filter),
+                    mimetype="text/event-stream")
