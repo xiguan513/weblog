@@ -9,8 +9,11 @@
     使用ansbible获取远端服务器日志信息，通过web展示
     
 ansible 2.2以上版本
-    
-pip  intall -r requirements.txt
+
+sudo apt-get install python-pip python-dev build-essential
+sudo pip install --upgrade pip
+
+sudo pip  intall -r requirements.txt
     
 python db_create.py #执行sql 
 
