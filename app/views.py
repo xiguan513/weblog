@@ -48,10 +48,12 @@ def outlog(First_time,Last_time):
     (status,output) = commands.getstatusoutput(common.format(First=First_time, Last=Last_time, logfile=logfile))
 
     if status==0:
-        for line in output.readlines():
-            yield '%s\n\n' % line
+        log_name=time.strftime('%Y-%m-%d-%H-%M')+".log"
+        with open(log_name,"w") as f:
+            f.write(output)
+        yield "Down log file %s" % log_name
     else:
-        yield "Get Log File Fail!"
+        yield "Get Log File Fail! start: %s endtime:%s" % (First_time,Last_time)
 
 
 @app.route('/query')

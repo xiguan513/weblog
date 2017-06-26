@@ -8,16 +8,26 @@
 -----------------------------------
     使用ansbible获取远端服务器日志信息，通过web展示
     
-ansible 2.2以上版本
+安装ansible
+-----------------------------------
 
-sudo apt-get install python-pip python-dev build-essential
-sudo pip install --upgrade pip
-
-sudo pip  intall -r requirements.txt
+    更新安装库
+    sudo apt-get update
     
-python db_create.py #执行sql 
+    然后输入最后的四行命令进行安装的操作
+    sudo apt-get install software-properties-common
+    sudo apt-add-repository ppa:ansible/ansible
+    sudo apt-get update
+    sudo apt-get install ansible
 
-python run.py#运行服务
+安装组件
+-----------------------------------
+
+    pip  intall -r requirements.txt
+        
+    python db_create.py #执行sql 
+    
+    python run.py#运行服务
       
       
 
