@@ -20,3 +20,19 @@ class total_log(db.Model):
 
     def __repr__(self):
         return '<total_log %r>' % (self.ip)
+
+class time_log(db.Model):
+    id=db.Column(db.Integer,primary_key=True)
+    project_name=db.Column(db.String(100))
+    log_address=db.Column(db.String(500))
+
+    def __repr__(self):
+        return "%s" % self.log_address
+
+class grep_log(db.Model):
+    id=db.Column(db.Integer,primary_key=True)
+    project_name=db.Column(db.String(100))
+    log_address=db.Column(db.String(500))
+
+    def __repr__(self):
+        return "%s" % self.log_address

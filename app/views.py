@@ -1,12 +1,13 @@
 from flask import render_template, request, Response
 import datetime
-from app import app, db
-from .models import ms_mi_log, total_log
+from app import app,db
+from .models import ms_mi_log, total_log,time_log
 import time
 import os
 import re
 import sys
 import commands
+
 
 @app.route('/')
 def index():
@@ -15,7 +16,9 @@ def index():
 
 @app.route('/hosts')
 def hosts():
-    return render_template("hosts.html")
+    project_list = db.session.query(time_log.project_name).all()
+    print project_list
+    return render_template("hosts.html",project_list=project_list)
 
 
 @app.route('/weblog')
@@ -41,11 +44,11 @@ def main():
     return render_template("ms_mi.html", echarts_date=echarts_date, ms_data_str=ms_data_str, mi_data_str=mi_data_str)
 
 
-def outlog(First_time,Last_time):
-    logfile="/alidata/www/logs/catalina-2017-06-22.log"
+def outlog(ip,First_time,Last_time):
+    logfile=time_log.query.filter_by(project_name='{}'.format(ip)).first()
     first_time_list = First_time.split(' ')[0]
-    common = """ansible test -m script -a "/home/song/tomcat_log_time.sh '{First}' '{Last}' {logfile}" """
-    (status,output) = commands.getstatusoutput(common.format(First=First_time, Last=Last_time, logfile=logfile))
+    common = """ansible {hostname} -m script -a "/home/song/tomcat_log_time.sh '{First}' '{Last}' {logfile}" """
+    (status,output) = commands.getstatusoutput(common.format(hostname=ip,First=First_time, Last=Last_time, logfile=logfile))
 
     if status==0:
         log_name=time.strftime('%Y-%m-%d-%H-%M')+".log"
@@ -58,9 +61,10 @@ def outlog(First_time,Last_time):
 
 @app.route('/query')
 def query():
+    ip=request.args.get("project")
     First_time = request.args.get("First Time").replace('T', ' ')
     Last_time = request.args.get("Last Time").replace('T', ' ')
-    return Response(outlog(First_time, Last_time),
+    return Response(outlog(ip,First_time, Last_time),
                     mimetype="text/event-stream")
 
 

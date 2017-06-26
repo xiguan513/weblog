@@ -13,9 +13,14 @@
     <div class="row">
     
         <form class="form-inline" action="/query">
-          <div class="col-md-2"></div>
+          <div class="col-md-2"> </div>
            输入主机名
-            <input type="text" class="form-control" id="ip" name="ip" placeholder="192.168.1.1">
+{#            <input type="text" class="form-control" id="ip" value="" name="project" placeholder="b2b">#}
+            <select type="text" id="ip" class="form-control" value="" name="project"  placeholder="b2b">
+            {% for project in project_list %}
+                <option value='{{ project.project_name }}'>{{ project.project_name }}</option>
+            {% endfor %}
+            </select>
           <div class="form-group">
             开始日期
             <input class="form_date form-control" id="starttime" size="16" type="datetime-local" value="2017-01-01T00:00" name="First Time"/>
@@ -45,11 +50,11 @@
 
             var t = false;
             function sse(ip,starttime,endtime) {
-                var source = new EventSource('/query'+'?'+ip+'&'+'First+Time='+starttime+'&'+'Last+Time='+endtime);
+                var source = new EventSource('/query'+'?'+'project='+ip+'&'+'First+Time='+starttime+'&'+'Last+Time='+endtime);
 
                 // var out = document.getElementById('out');
                 source.onmessage = function(e) {
-                    alert("测试1111111111111111111111111111")
+
                     // XSS in chat is fun
                     if(t){
                         source.close();
