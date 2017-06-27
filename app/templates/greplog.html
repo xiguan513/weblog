@@ -11,24 +11,15 @@
         <div class="col-md-2"></div>
         <div class="form-inline" onsubmit="">
                 <div class="row">
-                        <!--<div class="col-md-2"></div>-->
+                        <div class="col-md-2"></div>
                         <div class="form-group">
                             <label class="sr-only" for="exampleInputEmail3">Email address</label>
                             <!--<input type="text" id="ip" class="form-control"  placeholder="主机名">-->
-                            <select type="text" id="ip" class="form-control"  placeholder="主机名">
-                            <option value='tomcat_core_ife'>tomcat_core_ife</option>
-                            <option value='tomcat_core_biz'>tomcat_core_biz</option>
-                            <option value='tomcat_loan_biz'>tomcat_loan_biz</option>
-                            <option value='tomcat_ofe_appl'>tomcat_ofe_appl</option>
-                            <option value='tomcat_appl_biz'>tomcat_appl_biz</option>
-                            <option value='tomcat_workflow_core'>tomcat_workflow_core</option>
-                            <option value='tomcat_message'>tomcat_message</option>
-                            <option value='tomcat_tasks'>tomcat_tasks</option>
-                            </select><br>
-                        </div>
-                        <div class="form-group">
-                            <label class="sr-only" for="exampleInputPassword3">Password</label>
-                            <input type="text" id="logfile" class="form-control" placeholder="log文件,如 mi.log">
+                        <select type="text" id="ip" class="form-control" name="project" placeholder="b2b">
+                        {% for project in project_grep %}
+                            <option  value='{{ project.project_name }}'>{{ project.project_name }}</option>
+                        {% endfor %}
+                        </select>
                         </div>
                         <div class="form-group">
                             <label class="sr-only" for="exampleInputPassword3">Password</label>
@@ -40,7 +31,8 @@
                 </div>
                 <br/>
                  <div class="row">
-                    <div class="col-md-3"></div>
+                        <div class="col-md-2"></div>
+                        <div class="col-md-2"></div>
                         <div class="form-group">
                             <label class="sr-only" for="exampleInputPassword3">Password</label>
                             <input type="text" id="startline" class="form-control" placeholder="开始行号">
@@ -51,6 +43,7 @@
                          </div>
                          <button type="button" id="startmem" class="btn btn-default">开始行号</button>
                          <button type="button" id="endmem" class="btn btn-default">结束行号</button>
+
                     </div>
                 </div>
         </div>
@@ -68,9 +61,8 @@
 <script>
             
             var t = false;
-            function sse(ip,logfile,filter,startmem,endmem) {
-                    alert(ip)
-                    var source = new EventSource('/greplog/'+logfile+'/'+filter+'/'+startmem+'/'+endmem);
+            function sse(ip,filter) {
+                    var source = new EventSource('/greplog/'+ip+'/'+filter);
 
                 // var out = document.getElementById('out');
                 source.onmessage = function(e) {
@@ -101,14 +93,11 @@
             });
             $('#start').click(function(){
               // action goes here!!
-              logfile=$("#logfile").val();
               ip=$("#ip").val();
               filter=$("#filter").val();
-              startmem=$("#startmem").val();
-              endmem=$("#endmem").val();
               t = false;
-              console.log(logfile);
-              sse(ip,logfile,filter,startmem,endmem);
+              console.log(filter);
+              sse(ip,filter);
             });
             $('#clean').click(function(){
               $("#out").html("");

@@ -1,7 +1,7 @@
 from flask import render_template, request, Response
 import datetime
 from app import app,db
-from .models import ms_mi_log, total_log,time_log
+from .models import ms_mi_log, total_log,time_log,real_time,grep_log
 import time
 import os
 import re
@@ -17,18 +17,19 @@ def index():
 @app.route('/hosts')
 def hosts():
     project_list = db.session.query(time_log.project_name).all()
-    print project_list
     return render_template("hosts.html",project_list=project_list)
 
 
 @app.route('/weblog')
 def weblog():
-    return render_template("weblog.html")
+    project_real = db.session.query(real_time.project_name).all()
+    return render_template("weblog.html",project_real=project_real)
 
 
 @app.route('/greplog')
 def greplog():
-    return render_template("greplog.html")
+    project_grep = db.session.query(grep_log.project_name).all()
+    return render_template("greplog.html",project_grep=project_grep)
 
 @app.route('/index')
 def main():
@@ -45,7 +46,10 @@ def main():
 
 
 def outlog(ip,First_time,Last_time):
+    ip=str(ip)
     logfile=time_log.query.filter_by(project_name='{}'.format(ip)).first()
+    #print logfile
+
     first_time_list = First_time.split(' ')[0]
     common = """ansible {hostname} -m script -a "/home/song/tomcat_log_time.sh '{First}' '{Last}' {logfile}" """
     (status,output) = commands.getstatusoutput(common.format(hostname=ip,First=First_time, Last=Last_time, logfile=logfile))
@@ -82,10 +86,10 @@ def api():
     return 'OK'
 
 
-def event_stream(logfile,filter=None):
-    logfile="/alidata/www/logs/%s" % logfile
-    command = '''ansible test -a "tail -n10 %s"''' % (logfile)
-    textlist = os.popen(command).readlines()
+def event_stream(ip,filter=None):
+    logfile=real_time.query.filter_by(project_name='{}'.format(ip)).first()
+    command = '''ansible {hostname} -a "tail -n10 {logfile}"'''
+    textlist = os.popen(command.format(hostname=ip,logfile=logfile)).readlines()
     for line in textlist:
         if filter is not None:
             re_filter=re.compile(r'(%s)'%filter,re.I)
@@ -97,19 +101,21 @@ def event_stream(logfile,filter=None):
 
 
 
-@app.route('/stream/<logfile>')
-@app.route('/stream/<logfile>/<filter>')
-def stream(logfile, filter=None):
-    return Response(event_stream(logfile, filter),
+@app.route('/stream/<ip>')
+@app.route('/stream/<ip>/<filter>')
+def stream(ip, filter=None):
+    return Response(event_stream(ip, filter),
                     mimetype="text/event-stream")
 
 
 
 
-def event_keywords(logfile,filter):
-    logfile="/alidata/www/logs/%s" % logfile
-    command = '''ansible test -a "grep -n %s %s"''' % (filter,logfile)
-    textlist = os.popen(command).readlines()
+
+def event_keywords(ip,filter):
+    ip = str(ip)
+    logfile = grep_log.query.filter_by(project_name='{}'.format(ip)).first()
+    command = '''ansible {hostname} -a "grep -n {filter} {logfile}"'''
+    textlist = os.popen(command.format(hostname=ip,filter=filter,logfile=logfile)).readlines()
     for line in textlist:
         if filter is not None:
             re_filter=re.compile(r'(%s)'%filter,re.I)
@@ -120,7 +126,7 @@ def event_keywords(logfile,filter):
             yield 'data: %s\n\n' % "Query condition is empty. Please confirm"
 
 
-@app.route('/greplog/<logfile>/<filter>')
-def keywords(logfile, filter,):
-    return Response(event_keywords(logfile, filter),
+@app.route('/greplog/<ip>/<filter>')
+def keywords(ip, filter,):
+    return Response(event_keywords(ip,filter),
                     mimetype="text/event-stream")

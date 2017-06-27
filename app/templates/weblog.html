@@ -12,12 +12,17 @@
         <form class="form-inline" onsubmit="">
           <div class="form-group">
             <label class="sr-only" for="exampleInputEmail3">Email address</label>
-            <input type="text" id="ip" class="form-control"  placeholder="ip">
+{#            <input type="text" id="ip" class="form-control"  placeholder="ip">#}
+            <select type="text" id="ip" class="form-control" name="project" placeholder="b2b">
+            {% for project in project_real %}
+                <option  value='{{ project.project_name }}'>{{ project.project_name }}</option>
+            {% endfor %}
+            </select>
           </div>
-          <div class="form-group">
-            <label class="sr-only" for="exampleInputPassword3">Password</label>
-            <input type="text" id="logfile" class="form-control" placeholder="log文件,如 mi.log">
-          </div>
+{#          <div class="form-group">#}
+{#            <label class="sr-only" for="exampleInputPassword3">Password</label>#}
+{#            <input type="text" id="logfile" class="form-control" placeholder="log文件,如 mi.log">#}
+{#          </div>#}
           <div class="form-group">
             <label class="sr-only" for="exampleInputPassword3">Password</label>
             <input type="text" id="filter" class="form-control" placeholder="过滤关键字,如 error">
@@ -43,14 +48,14 @@
 <script>
             
             var t = false;
-            function sse(ip,logfile,filter) {
+            function sse(ip,filter) {
                 if(filter)
                 {
-                    var source = new EventSource('/stream/'+logfile+'/'+filter);
+                    var source = new EventSource('/stream/'+ip+'/'+filter);
                 }
                 else {
                     //var source = new EventSource('/stream/'+logfile);
-                    var source = new EventSource('/stream/'+logfile);
+                    var source = new EventSource('/stream/'+ip);
                 };
                 // var out = document.getElementById('out');
                 source.onmessage = function(e) {
@@ -86,7 +91,7 @@
               filter=$("#filter").val();
               t = false;
               console.log(logfile);
-              sse(ip,logfile,filter);
+              sse(ip,filter);
             });
             $('#clean').click(function(){
               $("#out").html("");
