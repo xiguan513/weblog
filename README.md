@@ -27,8 +27,8 @@
 
 安装组件
 -----------------------------------
-
-    pip  intall -r requirements.txt
+    sudo pip install -i https://pypi.tuna.tsinghua.edu.cn/simple/ flask-babelex==0.9.3
+    sudo pip  intall -r requirements.txt
         
     python db_create.py #执行sql 
     

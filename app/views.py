@@ -29,6 +29,11 @@ def weblog():
 def greplog():
     return render_template("greplog.html",project_grep=project_list)
 
+# @app.route('/admin')
+# def admin():
+#     return render_template("admin.html")
+
+
 @app.route('/index')
 def main():
     interval_date = datetime.datetime.now() - datetime.timedelta(days=7)
