@@ -9,7 +9,7 @@ import sys
 import commands
 
 
-project_list = db.session.query(search_log.project_name).all()
+
 @app.route('/')
 def index():
     return render_template("index.html")
@@ -17,16 +17,19 @@ def index():
 
 @app.route('/hosts')
 def hosts():
+    project_list = db.session.query(search_log.project_name).all()
     return render_template("hosts.html",project_list=project_list)
 
 
 @app.route('/weblog')
 def weblog():
+    project_list = db.session.query(search_log.project_name).all()
     return render_template("weblog.html",project_real=project_list)
 
 
 @app.route('/greplog')
 def greplog():
+    project_list = db.session.query(search_log.project_name).all()
     return render_template("greplog.html",project_grep=project_list)
 
 # @app.route('/admin')
