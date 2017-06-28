@@ -32,9 +32,6 @@ def greplog():
     project_list = db.session.query(search_log.project_name).all()
     return render_template("greplog.html",project_grep=project_list)
 
-# @app.route('/admin')
-# def admin():
-#     return render_template("admin.html")
 
 
 @app.route('/index')
@@ -54,17 +51,19 @@ def main():
 def outlog(ip,First_time,Last_time):
     ip=str(ip)
     logfile=search_log.query.filter_by(project_name='{}'.format(ip)).first()
-    first_time_list = First_time.split(' ')[0]
+    print logfile
     common = """ansible {hostname} -m script -a "/home/song/tomcat_log_time.sh '{First}' '{Last}' {logfile}" """
     (status,output) = commands.getstatusoutput(common.format(hostname=ip,First=First_time, Last=Last_time, logfile=logfile))
-
     if status==0:
+        log_dir="logs/"
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
         log_name=time.strftime('%Y-%m-%d-%H-%M')+".log"
-        with open(log_name,"w") as f:
+        with open(log_dir+log_name,"w") as f:
             f.write(output)
-        yield "Down log file %s" % log_name
+        return "Down log file %s" % log_name
     else:
-        yield "Get Log File Fail! start: %s endtime:%s" % (First_time,Last_time)
+        return "Get Log File Fail! start: %s endtime:%s" % (First_time,Last_time)
 
 
 @app.route('/query')
@@ -92,6 +91,7 @@ def api():
 
 def event_stream(ip,filter=None):
     logfile=search_log.query.filter_by(project_name='{}'.format(ip)).first()
+    print logfile
     command = '''ansible {hostname} -a "tail -n10 {logfile}"'''
     textlist = os.popen(command.format(hostname=ip,logfile=logfile)).readlines()
     for line in textlist:
@@ -118,6 +118,7 @@ def stream(ip, filter=None):
 def event_keywords(ip,filter):
     ip = str(ip)
     logfile = search_log.query.filter_by(project_name='{}'.format(ip)).first()
+    print logfile
     command = '''ansible {hostname} -a "grep -n {filter} {logfile}"'''
     textlist = os.popen(command.format(hostname=ip,filter=filter,logfile=logfile)).readlines()
     for line in textlist:

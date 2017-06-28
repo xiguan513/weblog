@@ -17,9 +17,9 @@ app.config.from_object('config')
 app.config.setdefault('SQLALCHEMY_TRACK_MODIFICATIONS', True)
 db = SQLAlchemy(app)
 
-from app import views , models
-
 admin = Admin(app,name=u'Admin')
+
+from app import views , models
 
 class MyV1(ModelView):
 
@@ -34,3 +34,4 @@ class MyV1(ModelView):
 
 
 admin.add_view(MyV1(db.session,name=u"主机添加"))
+
