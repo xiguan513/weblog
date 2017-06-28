@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 from flask import render_template, request, Response
 import datetime
 from app import app,db
@@ -30,7 +31,7 @@ def weblog():
 @app.route('/greplog')
 def greplog():
     project_list = db.session.query(search_log.project_name).all()
-    return render_template("greplog.html",project_grep=project_list)
+    return render_template("greplog.html", project_grep=project_list)
 
 
 
@@ -48,6 +49,73 @@ def main():
     return render_template("ms_mi.html", echarts_date=echarts_date, ms_data_str=ms_data_str, mi_data_str=mi_data_str)
 
 
+
+
+@app.route('/api', methods=['POST'])
+def api():
+    ip = request.remote_addr
+    rc = request.form.get('rc', None)
+    uin = request.form.get('uin', None)
+    mbox = request.form.get('mbox', None)
+    des = request.form.get('des', None)
+    print ip, rc, uin, mbox, des
+    log_err = ms_mi_log(ip=ip, rc=rc, uin=uin, mbox=mbox, des=des)
+    db.session.add(log_err)
+    db.session.commit()
+    return 'OK'
+
+#实时日志加关键字
+def event_stream(ip,filter=None):
+    logfile=search_log.query.filter_by(project_name='{}'.format(ip)).first()
+    command = '''ansible {hostname} -a "tail -n10 {logfile}"'''
+    print command
+    textlist = os.popen(command.format(hostname=ip,logfile=logfile))
+    for line in textlist.readlines():
+        if filter is not None:
+            re_filter=re.compile(r'(%s)'%filter,re.I)
+            if re.findall(re_filter,line):
+                res=re.sub(re_filter,r'<font color="red">\1</font>',line)
+                yield 'data: %s\n\n' % res.rstrip()
+        else:
+            yield 'data: %s\n\n' % line.rstrip()
+
+
+@app.route('/stream/<ip>')
+@app.route('/stream/<ip>/<filter>')
+def stream(ip, filter=None):
+    return Response(event_stream(ip, filter),
+                    mimetype="text/event-stream")
+
+
+
+
+#关键字查询
+def event_keywords(ip,filter):
+    ip = str(ip)
+    logfile = search_log.query.filter_by(project_name='{}'.format(ip)).first()
+    print logfile
+    command = '''ansible {hostname} -a "grep -n {filter} {logfile}"'''
+    print command
+    (status, output) = commands.getstatusoutput(command.format(hostname=ip,filter=filter,logfile=logfile))
+    if status==0:
+        for line in output:
+            if filter is not None:
+                re_filter=re.compile(r'(%s)'%filter,re.I)
+                if re.findall(re_filter,line):
+                    res=re.sub(re_filter,r'<font color="red">\1</font>',line)
+                    return 'data: %s\n\n' % res.rstrip()
+    else:
+        return 'data: %s\n\n' % "Query condition is empty. Please confirm"
+
+
+
+@app.route('/greplog/\?<ip>/<filter>')
+def keywords(ip, filter):
+    print "222222222222222222"
+    return Response(event_keywords(ip,filter))
+
+
+#根据时间
 def outlog(ip,First_time,Last_time):
     ip=str(ip)
     logfile=search_log.query.filter_by(project_name='{}'.format(ip)).first()
@@ -72,66 +140,4 @@ def query():
     First_time = request.args.get("First Time").replace('T', ' ')
     Last_time = request.args.get("Last Time").replace('T', ' ')
     return Response(outlog(ip,First_time, Last_time),
-                    mimetype="text/event-stream")
-
-
-@app.route('/api', methods=['POST'])
-def api():
-    ip = request.remote_addr
-    rc = request.form.get('rc', None)
-    uin = request.form.get('uin', None)
-    mbox = request.form.get('mbox', None)
-    des = request.form.get('des', None)
-    print ip, rc, uin, mbox, des
-    log_err = ms_mi_log(ip=ip, rc=rc, uin=uin, mbox=mbox, des=des)
-    db.session.add(log_err)
-    db.session.commit()
-    return 'OK'
-
-
-def event_stream(ip,filter=None):
-    logfile=search_log.query.filter_by(project_name='{}'.format(ip)).first()
-    print logfile
-    command = '''ansible {hostname} -a "tail -n10 {logfile}"'''
-    textlist = os.popen(command.format(hostname=ip,logfile=logfile)).readlines()
-    for line in textlist:
-        if filter is not None:
-            re_filter=re.compile(r'(%s)'%filter,re.I)
-            if re.findall(re_filter,line):
-                res=re.sub(re_filter,r'<font color="red">\1</font>',line)
-                yield 'data: %s\n\n' % res.rstrip()
-        else:
-            yield 'data: %s\n\n' % line.rstrip()
-
-
-
-@app.route('/stream/<ip>')
-@app.route('/stream/<ip>/<filter>')
-def stream(ip, filter=None):
-    return Response(event_stream(ip, filter),
-                    mimetype="text/event-stream")
-
-
-
-
-
-def event_keywords(ip,filter):
-    ip = str(ip)
-    logfile = search_log.query.filter_by(project_name='{}'.format(ip)).first()
-    print logfile
-    command = '''ansible {hostname} -a "grep -n {filter} {logfile}"'''
-    textlist = os.popen(command.format(hostname=ip,filter=filter,logfile=logfile)).readlines()
-    for line in textlist:
-        if filter is not None:
-            re_filter=re.compile(r'(%s)'%filter,re.I)
-            if re.findall(re_filter,line):
-                res=re.sub(re_filter,r'<font color="red">\1</font>',line)
-                yield 'data: %s\n\n' % res.rstrip()
-        else:
-            yield 'data: %s\n\n' % "Query condition is empty. Please confirm"
-
-
-@app.route('/greplog/<ip>/<filter>')
-def keywords(ip, filter,):
-    return Response(event_keywords(ip,filter),
                     mimetype="text/event-stream")

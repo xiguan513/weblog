@@ -19,10 +19,7 @@
             {% endfor %}
             </select>
           </div>
-{#          <div class="form-group">#}
-{#            <label class="sr-only" for="exampleInputPassword3">Password</label>#}
-{#            <input type="text" id="logfile" class="form-control" placeholder="log文件,如 mi.log">#}
-{#          </div>#}
+
           <div class="form-group">
             <label class="sr-only" for="exampleInputPassword3">Password</label>
             <input type="text" id="filter" class="form-control" placeholder="过滤关键字,如 error">
@@ -90,7 +87,7 @@
               ip=$("#ip").val();
               filter=$("#filter").val();
               t = false;
-              console.log(logfile);
+              console.log(ip);
               sse(ip,filter);
             });
             $('#clean').click(function(){
