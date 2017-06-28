@@ -98,20 +98,22 @@ def event_keywords(ip,filter):
     print command
     (status, output) = commands.getstatusoutput(command.format(hostname=ip,filter=filter,logfile=logfile))
     if status==0:
+        output=output.split("\n")
         for line in output:
-            if filter is not None:
-                re_filter=re.compile(r'(%s)'%filter,re.I)
-                if re.findall(re_filter,line):
-                    res=re.sub(re_filter,r'<font color="red">\1</font>',line)
-                    return 'data: %s\n\n' % res.rstrip()
+            print line
+            re_filter=re.compile(r'(%s)'%filter,re.I)
+            if re.findall(re_filter,line):
+                res=re.sub(re_filter,r'<font color="red">\1</font>',line)
+                return 'data: %s\n\n' % res.rstrip()
     else:
         return 'data: %s\n\n' % "Query condition is empty. Please confirm"
 
 
 
-@app.route('/greplog/\?<ip>/<filter>')
-def keywords(ip, filter):
-    print "222222222222222222"
+@app.route('/grep')
+def keywords():
+    ip = request.args.get("project")
+    filter = request.args.get("filter")
     return Response(event_keywords(ip,filter))
 
 

@@ -11,7 +11,7 @@
 <div class="wrapper">
     <div class="row">
     <div class="col-md-3"></div>
-        <form class="form-inline" onsubmit="">
+        <form class="form-inline" action="/grep">
           <div class="form-group">
             <label class="sr-only" for="exampleInputEmail3">Email address</label>
             <select type="text" id="ip" class="form-control" name="project" placeholder="b2b">
@@ -23,10 +23,10 @@
 
           <div class="form-group">
             <label class="sr-only" for="exampleInputPassword3">Password</label>
-            <input type="text" id="filter" class="form-control" placeholder="过滤关键字,如 error">
+            <input type="text" id="filter" name="filter" class="form-control" placeholder="过滤关键字,如 error">
           </div>
 
-          <button type="button" id="start" onclick="displayDate()" class="btn btn-default">获取日志</button>
+          <button type="button" id="start" class="btn btn-default">获取日志</button>
           <button type="button" id="stop" class="btn btn-default">停止</button>
           <button type="button" id="clean" class="btn btn-default">清空</button>
         </form>
@@ -48,13 +48,13 @@
 
    $("#start").bind("click", function () {
     $.ajax({
-       data: $("#ip").val()+"/"+$("#filter").val(),
+       data: 'project='+$("#ip").val()+"&"+'filter='+$("#filter").val(),
        type: "get",
-       url: "greplog/",
+       url: "grep",
        async: false,
 
-       success: function (data) {
-            document.getElementById('out').innerHTML+=data+'</br>';
+       success: function (result) {
+            document.getElementById('out').innerHTML+=result+'</br>';
        },
        error:function(){
             document.getElementById('out').innerHTML+="没有数据";
