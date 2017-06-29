@@ -119,7 +119,12 @@ def event_keywords_page(ip,page):
     logfile = search_log.query.filter_by(project_name='{}'.format(ip)).first()
     line_head=page*line_num+1
     line_tail=page*line_num+line_num
-    backfile = os.open("sed -n '{0},{1}p' {2}".format(line_head,line_tail,logfile))
+    with open("grepoutput{}.log".format(ip), "r") as grepoutput:
+        file_line=grepoutput.readlines()
+    if line_tail==file_line:
+        backfile = os.open("sed -n '{0},$p' {2}".format(line_head, logfile))
+    else:
+        backfile = os.open("sed -n '{0},{1}p' {2}".format(line_head,line_tail,logfile))
     return backfile
 
 
