@@ -8,6 +8,7 @@ import os
 import re
 import sys
 import commands
+import cPickle as pickle
 
 
 
@@ -88,10 +89,10 @@ def stream(ip, filter=None):
 
 
 
-
 #关键字查询
 def event_keywords(ip,filter):
     ip = str(ip)
+    line_num=500
     logfile = search_log.query.filter_by(project_name='{}'.format(ip)).first()
     print logfile
     command = '''ansible {hostname} -a "grep -n {filter} {logfile}"'''
@@ -99,22 +100,33 @@ def event_keywords(ip,filter):
     (status, output) = commands.getstatusoutput(command.format(hostname=ip,filter=filter,logfile=logfile))
     if status==0:
         output=output.split("\n")
-        for line in output:
-            print line
-            re_filter=re.compile(r'(%s)'%filter,re.I)
-            if re.findall(re_filter,line):
-                res=re.sub(re_filter,r'<font color="red">\1</font>',line)
-                return 'data: %s\n\n' % res.rstrip()
+        with open("grepoutput{}.pkl".format(ip),"w") as grepoutput:
+            pickle.dump(output,grepoutput,True)
+            return output[0:line_num]
     else:
-        return 'data: %s\n\n' % "Query condition is empty. Please confirm"
+        return '%s\n\n' % "Query condition is empty. Please confirm"
 
+#关键字查询页码查询
+def event_keywords_page(ip,page):
+    ip = str(ip)
+    page=int(page)
+    line_num=500
+    with open("grepoutput{}.pkl".format(ip), "w") as grepoutput:
+        line_head=page*line_num+1
+        line_tail=page*line_num+line_num
+        output=pickle.load(grepoutput)
+        return output[line_head:line_tail]
 
 
 @app.route('/grep')
 def keywords():
     ip = request.args.get("project")
     filter = request.args.get("filter")
-    return Response(event_keywords(ip,filter))
+    page = request.args.get("page")
+    if not page:
+        return Response(event_keywords(ip,filter))
+    else:
+        return Response(event_keywords_page(ip,page))
 
 
 #根据时间
