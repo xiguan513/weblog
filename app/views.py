@@ -8,7 +8,6 @@ import os
 import re
 import sys
 import commands
-import cPickle as pickle
 
 
 
@@ -89,20 +88,26 @@ def stream(ip, filter=None):
 
 
 
+#ansible test -m shell -a "sed -n '3000,10000p' /alidata/www/logs/catalina-2017-06-22.log |grep 北京路易旅行社有限公司"
 #关键字查询
 def event_keywords(ip,filter):
     ip = str(ip)
     line_num=500
     logfile = search_log.query.filter_by(project_name='{}'.format(ip)).first()
     print logfile
+    #command = '''ansible {hostname} -a "grep -n {filter} {logfile}"'''
     command = '''ansible {hostname} -a "grep -n {filter} {logfile}"'''
     print command
     (status, output) = commands.getstatusoutput(command.format(hostname=ip,filter=filter,logfile=logfile))
     if status==0:
         output=output.split("\n")
-        with open("grepoutput{}.pkl".format(ip),"w") as grepoutput:
-            pickle.dump(output,grepoutput,True)
-            return output[0:line_num]
+        with open("grepoutput{}.log".format(ip),"w") as grepoutput:
+            for line in output:
+                grepoutput.write(line)
+                grepoutput.write("\n")
+        backfile=os.open("sed -n '0,{0}p' {1}".format(line_num,logfile))
+        return backfile
+
     else:
         return '%s\n\n' % "Query condition is empty. Please confirm"
 
@@ -111,11 +116,12 @@ def event_keywords_page(ip,page):
     ip = str(ip)
     page=int(page)
     line_num=500
-    with open("grepoutput{}.pkl".format(ip), "w") as grepoutput:
-        line_head=page*line_num+1
-        line_tail=page*line_num+line_num
-        output=pickle.load(grepoutput)
-        return output[line_head:line_tail]
+    logfile = search_log.query.filter_by(project_name='{}'.format(ip)).first()
+    line_head=page*line_num+1
+    line_tail=page*line_num+line_num
+    backfile = os.open("sed -n '{0},{1}p' {2}".format(line_head,line_tail,logfile))
+    return backfile
+
 
 
 @app.route('/grep')
