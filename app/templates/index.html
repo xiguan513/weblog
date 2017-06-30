@@ -176,7 +176,8 @@ function iFrameHeight() {
     var ifm= document.getElementById("myiframe"); 
     var subWeb = document.frames ? document.frames["myiframe"].document : ifm.contentDocument; 
     if(ifm != null && subWeb != null) { 
-    ifm.height = subWeb.body.scrollHeight; 
+{#    ifm.height = subWeb.body.scrollHeight; #}
+        ifm.height = "1000";
     } 
 } 
 </script> 
