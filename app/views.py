@@ -66,16 +66,19 @@ def api():
 
 #实时日志加关键字
 def event_stream(ip,filter=None):
+    print ip
     logfile=search_log.query.filter_by(project_name='{}'.format(ip)).first()
     command = '''ansible {hostname} -a "tail -n10 {logfile}"'''
     print command
     textlist = os.popen(command.format(hostname=ip,logfile=logfile))
     for line in textlist.readlines():
-        if filter is not None:
+        if  filter!=None:
             re_filter=re.compile(r'(%s)'%filter,re.I)
             if re.findall(re_filter,line):
-                res=re.sub(re_filter,r'<font color="red">\1</font>',line)
+                res=re.sub(re_filter,r'<font color="red">{}</font>'.format(filter),line)
                 yield 'data: %s\n\n' % res.rstrip()
+            else:
+                yield 'data: %s\n\n' % line.rstrip()
         else:
             yield 'data: %s\n\n' % line.rstrip()
 
