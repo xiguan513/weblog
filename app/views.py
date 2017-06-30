@@ -11,6 +11,7 @@ import commands
 import json
 
 
+
 @app.route('/')
 def index():
     return render_template("index.html")
@@ -112,12 +113,12 @@ def event_keywords(ip,filter):
     (status, output) = commands.getstatusoutput(command.format(hostname=ip,filter=filter,logfile=logfile))
     if status==0:
         output=output.split("\n")
-        print output
-        with open("static/data/page.json","w") as grepoutput:
-            for i in grepoutput.readlines():
+        with open("app/static/data/page.json","w") as grepoutput:
+            for i in output:
                 a = {"dataNum": i}
                 data[u"datas"].append(a)
             grepoutput.write(json.dumps(data))
+        return render_template("greplog.html")
     else:
         return '%s\n\n' % "Query condition is empty. Please confirm"
 

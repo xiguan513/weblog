@@ -63,9 +63,9 @@
             <input type="text" id="filter" name="filter" class="form-control" placeholder="过滤关键字,如 error">
           </div>
 
-          <button type="button" id="start" class="btn btn-default">获取日志</button>
-          <button type="button" id="stop" class="btn btn-default">停止</button>
-          <button type="button" id="clean" class="btn btn-default">清空</button>
+          <button type="submit" id="start" class="btn btn-default">获取日志</button>
+          <button type="submit" id="stop" class="btn btn-default">停止</button>
+          <button type="submit" id="clean" class="btn btn-default">清空</button>
         </form>
 
     </div>
@@ -104,7 +104,7 @@
     	$(function(){
     		$(".pageBox").pageFun({  /*在本地服务器上才能访问哦*/
     			interFace:"static/data/page.json",  /*接口*/
-    			displayCount:30,  /*每页显示总条数*/
+    			displayCount:15,  /*每页显示总条数*/
     			maxPage:5,/*每次最多加载多少页*/
     			dataFun:function(data){
     				var dataHtml = data.dataNum+'<br/>';
