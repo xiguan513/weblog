@@ -171,10 +171,12 @@
 <script src="static/js/bootstrap-datetimepicker.js"></script>
 <script src="static/js/bootstrap-datetimepicker.fr.js"></script>
 
-
+<!--  http://www.lingchenliang.com/post/89.html
+//作者：凌陈亮www.lingchenliang.com（QQ：57404811）
+-->
 <script type="text/javascript" language="javascript">
 
-
+    iFrameHeight();
     function iFrameHeight(){ //函数：获取尺寸
     //获取浏览器窗口高度
     var winHeight=0;
@@ -190,7 +192,7 @@
     //DIV高度为浏览器窗口高度的一半
     //document.getElementById("myiframe").style.height= winHeight/2 +"px";
     }
-    window.onresize=autodivheight; //浏览器窗口发生变化时同时变化DIV高度
+    window.onresize=iFrameHeight; //浏览器窗口发生变化时同时变化DIV高度
 
 </script>
 

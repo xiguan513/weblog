@@ -42,5 +42,56 @@
     
     python run.py#运行服务
       
-      
+nginx 日志文件下载
+----------------------------------
 
+    autoindex on;
+    server {
+            listen 80;
+            server_name 192.168.0.172;
+            location /
+            {
+                    root /home/song/weblog/logs;
+                    if ($request_filename ~* ^.*?\.(log|txt|doc|pdf|rar|gz|zip|docx|exe|xlsx|ppt|pptx)$){
+                    add_header Content-Disposition 'attachment;';
+                    }
+    
+            }
+    }
+
+nginx flask uwsgi配置
+----------------------------------
+    uWSGI 安装
+        sudo apt-get install build-essential python-dev
+        sudo pip install uwsgi
+
+
+
+    配置nginx文件
+    song@ansible:/etc/nginx/conf.d$ cat weblog.conf 
+    server {
+        listen 81;
+        server_name 192.168.0.172
+        charset utf-8;
+        client_max_body_size 75M;
+        location / { try_files $uri @yourapplication; }
+        location @yourapplication {
+            include uwsgi_params;
+            uwsgi_pass 127.0.0.1:5000;
+        }
+    }
+    
+    配置uwsgi文件
+    song@ansible:~/weblog$ cat config.ini
+        [uwsgi]
+        socket = 127.0.0.1:5000 #表示和Nginx通信的地址和端口
+        processes = 4 #表示开启多少个子进程处理请求。
+        threads = 2 #每个进程的线程数
+        master = true
+        pythonpaht = /home/song/weblog #表示项目目录
+        module = run #表示项目启动模块，如上例为run.py，这里就为run
+        callable = app #表示Flask项目的实例名称，上例代码中app = Flask(__name__)，所以这里为app
+        memory-report = true
+
+    启动uwsgi服务
+    song@ansible:~/weblog$ uwsgi -d /var/log/uwsgi.log --ini /home/song/weblog/config.ini

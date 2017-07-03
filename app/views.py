@@ -35,6 +35,9 @@ def greplog():
     return render_template("greplog.html", project_grep=project_list)
 
 
+#@app.route('/down')
+def downlog():
+    return render_template("downfile.html")
 
 @app.route('/index')
 def main():
@@ -140,15 +143,18 @@ def outlog(ip,First_time,Last_time):
     logfile=search_log.query.filter_by(project_name='{}'.format(ip)).first()
     print logfile
     common = """ansible {hostname} -m script -a "/home/song/tomcat_log_time.sh '{First}' '{Last}' {logfile}" """
+    print common.format(hostname=ip,First=First_time, Last=Last_time, logfile=logfile)
     (status,output) = commands.getstatusoutput(common.format(hostname=ip,First=First_time, Last=Last_time, logfile=logfile))
     if status==0:
-        log_dir="logs/"
+        log_dir="/home/song/weblog/logs/"
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
         log_name=time.strftime('%Y-%m-%d-%H-%M')+".log"
         with open(log_dir+log_name,"w") as f:
             f.write(output)
-        return "Down log file %s" % log_name
+        return render_template("downfile.html",log_name=log_name)
+
+
     else:
         return "Get Log File Fail! start: %s endtime:%s" % (First_time,Last_time)
 
@@ -159,4 +165,4 @@ def query():
     First_time = request.args.get("First Time").replace('T', ' ')
     Last_time = request.args.get("Last Time").replace('T', ' ')
     return Response(outlog(ip,First_time, Last_time),
-                    mimetype="text/event-stream")
+                    mimetype="text/event-stream,text/html")
