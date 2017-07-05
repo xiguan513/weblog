@@ -9,7 +9,7 @@ import re
 import sys
 import commands
 import json
-
+from app.configfile import searchsql
 
 
 @app.route('/')
@@ -71,7 +71,9 @@ def api():
 #实时日志加关键字
 def event_stream(ip,filter=None):
     print ip
-    logfile=search_log.query.filter_by(project_name='{}'.format(ip)).first()
+    #logfile=db.session.query(search_log.log_address).filter(search_log.project_name=="{}".format(ip)).first()[0]
+    #logfile=search_log.query.filter_by(project_name='{}'.format(ip)).first()
+    logfile=searchsql.search(ip)["log_file"]
     command = '''ansible {hostname} -a "tail -n10 {logfile}"'''
     print command
     textlist = os.popen(command.format(hostname=ip,logfile=logfile))
@@ -109,7 +111,7 @@ def event_keywords(ip,filter):
     }
     ip = str(ip)
     line_num=500
-    logfile = search_log.query.filter_by(project_name='{}'.format(ip)).first()
+    logfile = searchsql.search(ip)["log_file"]
     print logfile
     command = '''ansible {hostname} -a "grep -n {filter} {logfile}"'''
     print command
@@ -140,7 +142,7 @@ def keywords():
 #根据时间
 def outlog(ip,First_time,Last_time):
     ip=str(ip)
-    logfile=search_log.query.filter_by(project_name='{}'.format(ip)).first()
+    logfile = searchsql.search(ip)["log_file"]
     print logfile
     common = """ansible {hostname} -m script -a "/home/song/tomcat_log_time.sh '{First}' '{Last}' {logfile}" """
     print common.format(hostname=ip,First=First_time, Last=Last_time, logfile=logfile)

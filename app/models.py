@@ -23,7 +23,10 @@ class total_log(db.Model):
 
 class search_log(db.Model):
     id=db.Column(db.Integer,primary_key=True)
+    ip = db.Column(db.String(100))
     project_name=db.Column(db.String(100))
+    group=db.Column(db.String(100))
+    port=db.Column(db.BigInteger)
     log_address=db.Column(db.String(500))
 
     def __repr__(self):

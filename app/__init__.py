@@ -25,10 +25,14 @@ class MyV1(ModelView):
 
     column_labels = {
         'id':u'序号',
+        'ip':u'IP',
         'project_name' : u'主机名',
+        'port': u'端口号',
+        'group': u'组名',
         'log_address':u'日志路径'
+
     }
-    column_list = ('id', 'project_name','log_address')
+    column_list = ('id','ip','project_name','port','group','log_address')
     def __init__(self, session, **kwargs):
         super(MyV1, self).__init__(models.search_log,session, **kwargs)
 
