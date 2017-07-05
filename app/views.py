@@ -74,8 +74,9 @@ def event_stream(ip,filter=None):
     #logfile=db.session.query(search_log.log_address).filter(search_log.project_name=="{}".format(ip)).first()[0]
     #logfile=search_log.query.filter_by(project_name='{}'.format(ip)).first()
     logfile=searchsql.search(ip)["log_file"]
-    command = '''ansible {hostname} -a "tail -n10 {logfile}"'''
+    command = '''ansible -i app/configfile/hosts.py {hostname} -a "tail -n10 {logfile}"'''
     print command
+    ip = searchsql.search(ip)["ip"]
     textlist = os.popen(command.format(hostname=ip,logfile=logfile))
     for line in textlist.readlines():
         if  filter!=None:
@@ -113,9 +114,11 @@ def event_keywords(ip,filter):
     line_num=500
     logfile = searchsql.search(ip)["log_file"]
     print logfile
-    command = '''ansible {hostname} -a "grep -n {filter} {logfile}"'''
+    command = '''ansible -i app/configfile/hosts.py {hostname} -a "grep -n {filter} {logfile}"'''
     print command
+    ip=searchsql.search(ip)["ip"]
     (status, output) = commands.getstatusoutput(command.format(hostname=ip,filter=filter,logfile=logfile))
+    print commands.getstatusoutput(command.format(hostname=ip,filter=filter,logfile=logfile))
     if status==0:
         output=output.split("\n")
         with open("app/static/data/page.json","w") as grepoutput:
@@ -144,8 +147,9 @@ def outlog(ip,First_time,Last_time):
     ip=str(ip)
     logfile = searchsql.search(ip)["log_file"]
     print logfile
-    common = """ansible {hostname} -m script -a "/home/song/tomcat_log_time.sh '{First}' '{Last}' {logfile}" """
+    common = """ansible -i app/configfile/hosts.py {hostname} -m script -a "/home/song/tomcat_log_time.sh '{First}' '{Last}' {logfile}" """
     print common.format(hostname=ip,First=First_time, Last=Last_time, logfile=logfile)
+    ip = searchsql.search(ip)["ip"]
     (status,output) = commands.getstatusoutput(common.format(hostname=ip,First=First_time, Last=Last_time, logfile=logfile))
     if status==0:
         log_dir="/home/song/weblog/logs/"

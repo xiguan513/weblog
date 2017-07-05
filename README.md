@@ -32,6 +32,10 @@
     sudo apt-add-repository ppa:ansible/ansible
     sudo apt-get update
     sudo apt-get install ansible
+    
+    关闭验证
+    host_key_checking = False
+    提前配置要密钥连接
 
 安装组件
 -----------------------------------
