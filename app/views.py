@@ -118,7 +118,7 @@ def event_keywords(ip,filter):
     print command
     ip=searchsql.search(ip)["ip"]
     (status, output) = commands.getstatusoutput(command.format(hostname=ip,filter=filter,logfile=logfile))
-    print commands.getstatusoutput(command.format(hostname=ip,filter=filter,logfile=logfile))
+    #print commands.getstatusoutput(command.format(hostname=ip,filter=filter,logfile=logfile))
     if status==0:
         output=output.split("\n")
         with open("app/static/data/page.json","w") as grepoutput:
